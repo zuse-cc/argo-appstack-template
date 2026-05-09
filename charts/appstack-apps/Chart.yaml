@@ -1,5 +1,0 @@
-apiVersion: v2
-description: Bootstrap ArgoCD with the appstack root Application
-name: appstack-apps
-type: application
-version: 0.1.0
