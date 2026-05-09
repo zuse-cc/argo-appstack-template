@@ -1,0 +1,5 @@
+apiVersion: v2
+name: secret-store
+description: Cluster-wide ESO SecretStore for appstack
+type: application
+version: 0.1.0

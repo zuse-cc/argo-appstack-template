@@ -1,0 +1,44 @@
+## Example: multi-source Application using an external Helm chart + local manifests.
+## Copy this file, rename it, and remove the leading '#' to activate.
+## See ArgoCD docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/
+#
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: my-app
+#   namespace: argocd
+# spec:
+#   project: {{ .Values.stack.name }}
+#   sources:
+#     # Primary source: Helm chart from OCI registry
+#     - repoURL: '{{ .Values.helm.repoURL | default "ghcr.io/your-org/helm" }}'
+#       chart: my-app
+#       targetRevision: '0.1.0'
+#       helm:
+#         valuesObject:
+#           image:
+#             repository: ghcr.io/your-org/my-app
+#             tag: 'latest'
+#           ingress:
+#             enabled: true
+#             host: 'my-app.{{ .Values.cluster.domain }}'
+#             {{- if .Values.oauth.enabled }}
+#             annotations:
+#               nginx.ingress.kubernetes.io/auth-url: "{{ .Values.oauth.authUrl }}"
+#               nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.oauth.signinUrl }}"
+#               nginx.ingress.kubernetes.io/auth-response-headers: "{{ .Values.oauth.responseHeaders }}"
+#             {{- end }}
+#     # Secondary source: local manifests (ExternalSecrets, RBAC, namespace init, etc.)
+#     - repoURL: '{{ .Values.source.repoURL }}'
+#       targetRevision: '{{ .Values.source.targetRevision }}'
+#       path: manifests/my-app
+#   destination:
+#     namespace: my-app
+#     server: 'https://kubernetes.default.svc'
+#   syncPolicy:
+#     {{- if .Values.autosync.enabled }}
+#     automated:
+#       prune: true
+#     {{- end }}
+#     syncOptions:
+#       - CreateNamespace=true

@@ -1,0 +1,16 @@
+## Authelia static user database - for testing only
+##
+## Password is hashed with argon2id. To generate a hash for a new password, run:
+##   docker run --rm authelia/authelia:latest \
+##     authelia crypto hash generate argon2 --password 'yourpassword'
+##
+## Default credentials: admin / authelia
+
+users:
+  admin:
+    displayname: Admin
+    ## Password: authelia
+    password: "$argon2id$v=19$m=65536,t=3,p=4$CNTFhfdhAmPjIvYXMG1t8A$+UGdlkVFKhQFlgIMYf0aWpwIZ0bn3gu1RT1U3j2I0A8"
+    email: admin@example.com
+    groups:
+      - admins

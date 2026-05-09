@@ -1,0 +1,31 @@
+{{- if eq .Values.backend "kubernetes" }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.stack.name }}-local-reader
+  namespace: external-secrets
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.stack.name }}-local-reader
+  namespace: {{ .Values.localSecrets.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.stack.name }}-local-reader
+  namespace: {{ .Values.localSecrets.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Values.stack.name }}-local-reader
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.stack.name }}-local-reader
+    namespace: external-secrets
+{{- end }}

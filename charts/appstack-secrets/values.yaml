@@ -1,0 +1,21 @@
+backend: kubernetes
+
+secret:
+  name: universal-auth-credentials
+
+universalAuth:
+  clientId: ""
+  clientSecret: ""
+
+# Map of secret name -> key/value pairs to create in the local-secrets namespace.
+# Each entry becomes a Kubernetes Secret that ESO reads via the kubernetes backend.
+#
+# Example:
+#   localSecrets:
+#     secrets:
+#       my-app-credentials:
+#         API_KEY: ""
+#         API_SECRET: ""
+localSecrets:
+  namespace: appstack-secrets
+  secrets: {}
