@@ -16,6 +16,16 @@ set -euo pipefail
 STACK_NAME="appstack"
 CLUSTER_NAME="k3d-lab-$(hostname)"
 CLUSTER_DOMAIN=""
+
+# Derive a default HTTPS repo URL from the git remote, converting SSH format if needed
+_remote=$(git remote get-url origin 2>/dev/null || true)
+if [[ "$_remote" == https://* ]]; then
+  REPO_URL="$_remote"
+elif [[ "$_remote" == git@* ]]; then
+  REPO_URL=$(echo "$_remote" | sed 's|git@\([^:]*\):\(.*\)|https://\1/\2|')
+else
+  REPO_URL=""
+fi
 BOOTSTRAP_NS="argocd"
 TARGET_REVISION="main"
 SSH_KEY_FILE=""
@@ -39,6 +49,7 @@ Usage: $0 [options]
 
 Options:
   --name <name>               Stack name — used as ArgoCD project name and resource prefix (default: appstack)
+  --repo-url <url>            HTTPS URL of this repository (required; used for ArgoCD source and repo credentials)
   --cluster <name>            Cluster name (default: k3d-lab-<hostname>)
   --domain <domain>           Cluster domain (default: <cluster-name>.local)
   --namespace <ns>            ArgoCD namespace (default: argocd)
@@ -47,7 +58,7 @@ Options:
   --infisical-project <slug>  Infisical project slug; enables Infisical integration
   --infisical-path <path>     Infisical secrets path for the ClusterSecretStore
   --auto-sync                 Enable ArgoCD auto-sync (default: off)
-  --oauth                     Enable OAuth ingress protection via Authelia
+  --oauth                     Enable OAuth ingress protection (requires a cluster-level OAuth proxy)
 
 Environment variables:
   GITHUB_TOKEN                            Required — used for ArgoCD repo access and Helm OCI registry auth
@@ -71,6 +82,7 @@ fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --name)               STACK_NAME="$2";        shift 2 ;;
+    --repo-url)           REPO_URL="$2";           shift 2 ;;
     --cluster)            CLUSTER_NAME="$2";       shift 2 ;;
     --domain)             CLUSTER_DOMAIN="$2";     shift 2 ;;
     --namespace)          BOOTSTRAP_NS="$2";       shift 2 ;;
@@ -88,6 +100,10 @@ done
 CLUSTER_DOMAIN="${CLUSTER_DOMAIN:-${CLUSTER_NAME}.local}"
 BOOTSTRAP_RELEASE="bootstrap-${STACK_NAME}"
 LOCAL_SECRETS_NS="${STACK_NAME}-secrets"
+
+# Validate repo URL — must be set and must use HTTPS (repo credentials use HTTP basic auth)
+[[ -z "$REPO_URL" ]] && die "--repo-url is required"
+[[ "$REPO_URL" == https://* ]] || die "--repo-url must use HTTPS (got: $REPO_URL)"
 
 # Validate required credentials
 [[ -z "${GITHUB_TOKEN:-}" ]] && die "GITHUB_TOKEN is required"
@@ -117,6 +133,7 @@ BACKEND="kubernetes"
 
 log "Bootstrapping appstack"
 log "  stack:     $STACK_NAME"
+log "  repo:      $REPO_URL"
 log "  cluster:   $CLUSTER_NAME"
 log "  domain:    $CLUSTER_DOMAIN"
 log "  revision:  $TARGET_REVISION"
@@ -161,6 +178,7 @@ HELM_ARGS=(
   --set "backend=$BACKEND"
   --set "cluster.name=$CLUSTER_NAME"
   --set "cluster.domain=$CLUSTER_DOMAIN"
+  --set "source.repoURL=$REPO_URL"
   --set "source.targetRevision=$TARGET_REVISION"
   --set "source.username=$GITHUB_USER"
   --set "source.password=$GITHUB_TOKEN"

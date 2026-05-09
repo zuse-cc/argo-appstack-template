@@ -6,7 +6,6 @@ GitHub repository template for GitOps-managed application stacks using ArgoCD ap
 
 - **ArgoCD app-of-apps** — root Application bootstrapped via Helm, managing child Applications from `apps/`
 - **External Secrets Operator integration** — ClusterSecretStore supporting Kubernetes-native (local dev) and Infisical backends
-- **Authelia** — optional OAuth2 proxy for ingress protection (`helm/authelia/`)
 - **Idempotent bootstrap script** — `scripts/bootstrap.sh` brings up the full stack from scratch
 
 ## Repository structure
@@ -22,7 +21,6 @@ GitHub repository template for GitOps-managed application stacks using ArgoCD ap
 ├── manifests/
 │   └── secret-store/         # Helm chart for ClusterSecretStore + RBAC (deployed by ArgoCD)
 ├── helm/
-│   └── authelia/             # Authelia values and user database for OAuth ingress protection
 └── scripts/
     └── bootstrap.sh          # One-shot cluster bootstrap
 ```
@@ -63,4 +61,4 @@ Copy `apps/templates/_example.yaml`, uncomment, and adapt. The multi-source patt
 
 ## OAuth protection
 
-Pass `--oauth` to bootstrap.sh to enable Authelia-based ingress protection. Update `helm/authelia/values.yaml` with your cluster domain before deploying. Applications opt in by including the nginx auth annotations (see `apps/templates/_example.yaml`).
+Pass `--oauth` to bootstrap.sh to enable OAuth ingress protection. Set `oauth.authUrl` to your cluster-level OAuth proxy's auth endpoint. Applications opt in by including the nginx auth annotations (see `apps/templates/_example.yaml`).

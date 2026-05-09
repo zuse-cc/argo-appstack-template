@@ -27,7 +27,6 @@ infisical:
 
 oauth:
   enabled: false
-  # These default to endpoints for in-cluster Authelia. Override for external providers.
   authUrl: "http://authelia.authelia.svc.cluster.local/api/authz/auth-request"
-  signinUrl: ""  # derived from cluster.domain if not set; override for external providers
+  signinUrl: "" # derived from cluster.domain if not set
   responseHeaders: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"
