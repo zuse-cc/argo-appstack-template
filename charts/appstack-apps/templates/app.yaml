@@ -15,7 +15,6 @@ spec:
           name: '{{ .Values.stack.name }}'
         autosync:
           enabled: {{ .Values.autosync.enabled }}
-        backend: '{{ .Values.backend }}'
         cluster:
           domain: '{{ .Values.cluster.domain }}'
         oauth:
@@ -26,13 +25,15 @@ spec:
         source:
           repoURL: '{{ .Values.source.repoURL }}'
           targetRevision: '{{ .Values.source.targetRevision }}'
-        {{- if .Values.infisical.projectSlug }}
-        infisical:
-          projectSlug: '{{ .Values.infisical.projectSlug }}'
-          secretsPath: '{{ .Values.infisical.secretsPath }}'
-          endpoint: '{{ .Values.infisical.endpoint }}'
-          environment: '{{ .Values.infisical.environment }}'
-        {{- end }}
+        secrets:
+          backend:
+            kubernetes:
+              namespace: '{{ .Values.secrets.backend.kubernetes.namespace | default (printf "%s-secrets" .Values.stack.name) }}'
+            infisical:
+              endpoint: '{{ .Values.secrets.backend.infisical.endpoint }}'
+              projectSlug: '{{ .Values.secrets.backend.infisical.projectSlug }}'
+              environment: '{{ .Values.secrets.backend.infisical.environment }}'
+              secretsPath: '{{ .Values.secrets.backend.infisical.secretsPath }}'
   destination:
     namespace: argocd
     server: 'https://kubernetes.default.svc'

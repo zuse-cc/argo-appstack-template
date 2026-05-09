@@ -4,9 +4,6 @@ stack:
 autosync:
   enabled: false
 
-# ESO backend: "kubernetes" (local dev) or "infisical"
-backend: kubernetes
-
 cluster:
   domain: appstack.local
 
@@ -14,11 +11,15 @@ source:
   repoURL: https://github.com/your-org/your-repo.git
   targetRevision: HEAD
 
-infisical:
-  endpoint: ""
-  environment: ""
-  projectSlug: ""
-  secretsPath: ""
+secrets:
+  backend:
+    kubernetes:
+      namespace: "" # defaults to {{ stack.name }}-secrets
+    infisical:
+      endpoint: ""
+      environment: ""
+      projectSlug: ""
+      secretsPath: ""
 
 oauth:
   enabled: false

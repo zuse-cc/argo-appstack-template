@@ -1,4 +1,5 @@
-{{- if eq .Values.backend "kubernetes" }}
+{{- $kubeNs := .Values.secrets.backend.kubernetes.namespace | default (printf "%s-secrets" .Values.stack.name) }}
+{{- if not .Values.secrets.backend.infisical.projectSlug }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -9,7 +10,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Values.stack.name }}-local-reader
-  namespace: {{ .Values.localSecrets.namespace }}
+  namespace: {{ $kubeNs }}
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -19,7 +20,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ .Values.stack.name }}-local-reader
-  namespace: {{ .Values.localSecrets.namespace }}
+  namespace: {{ $kubeNs }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

@@ -17,13 +17,15 @@ cluster:
 autosync:
   enabled: true
 
-backend: kubernetes
-
-infisical:
-  endpoint: https://eu.infisical.com
-  environment: dev
-  projectSlug: ""
-  secretsPath: ""
+secrets:
+  backend:
+    kubernetes:
+      namespace: ""  # defaults to {{ stack.name }}-secrets
+    infisical:
+      endpoint: https://eu.infisical.com
+      environment: dev
+      projectSlug: ""
+      secretsPath: ""
 
 oauth:
   enabled: false

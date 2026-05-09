@@ -1,16 +1,12 @@
 stack:
   name: appstack  # Must match the stack name set during bootstrap
 
-# backend controls which ESO provider is used for the ClusterSecretStore.
-# - kubernetes: reads from Secrets in the local-secrets namespace
-# - infisical: requires universal-auth-credentials secret in external-secrets namespace
-backend: kubernetes
-
-infisical:
-  endpoint: https://eu.infisical.com
-  projectSlug: ""
-  environment: dev
-  secretsPath: ""
-
-localSecrets:
-  namespace: appstack-secrets
+secrets:
+  backend:
+    kubernetes:
+      namespace: "" # defaults to {{ stack.name }}-secrets
+    infisical:
+      endpoint: https://eu.infisical.com
+      projectSlug: ""
+      environment: dev
+      secretsPath: ""
