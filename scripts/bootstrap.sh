@@ -175,20 +175,19 @@ HELM_ARGS=(
   --create-namespace
   --set "stack.name=$STACK_NAME"
   --set "autosync.enabled=$AUTO_SYNC"
-  --set "backend=$BACKEND"
   --set "cluster.name=$CLUSTER_NAME"
   --set "cluster.domain=$CLUSTER_DOMAIN"
   --set "source.repoURL=$REPO_URL"
   --set "source.targetRevision=$TARGET_REVISION"
   --set "source.username=$GITHUB_USER"
   --set "source.password=$GITHUB_TOKEN"
-  --set "localSecrets.namespace=${LOCAL_SECRETS_NS}"
+  --set "secrets.backend.kubernetes.namespace=${LOCAL_SECRETS_NS}"
 )
 
 if [[ "$BACKEND" == "infisical" ]]; then
   HELM_ARGS+=(
-    --set "infisical.projectSlug=$INFISICAL_PROJECT"
-    --set "infisical.secretsPath=$INFISICAL_PATH"
+    --set "secrets.backend.infisical.projectSlug=$INFISICAL_PROJECT"
+    --set "secrets.backend.infisical.secretsPath=$INFISICAL_PATH"
   )
 fi
 
