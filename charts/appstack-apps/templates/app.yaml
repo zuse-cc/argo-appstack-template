@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.stack.name }}-apps
+  namespace: argocd
+spec:
+  project: {{ .Values.stack.name }}
+  source:
+    repoURL: '{{ .Values.source.repoURL }}'
+    targetRevision: '{{ .Values.source.targetRevision }}'
+    path: apps
+    helm:
+      valuesObject:
+        stack:
+          name: '{{ .Values.stack.name }}'
+        autosync:
+          enabled: {{ .Values.autosync.enabled }}
+        backend: '{{ .Values.backend }}'
+        cluster:
+          domain: '{{ .Values.cluster.domain }}'
+        oauth:
+          enabled: {{ .Values.oauth.enabled }}
+          authUrl: '{{ .Values.oauth.authUrl }}'
+          signinUrl: '{{ .Values.oauth.signinUrl | default (printf "https://auth.%s/?rd=$scheme://$host$request_uri" .Values.cluster.domain) }}'
+          responseHeaders: '{{ .Values.oauth.responseHeaders }}'
+        source:
+          repoURL: '{{ .Values.source.repoURL }}'
+          targetRevision: '{{ .Values.source.targetRevision }}'
+        {{- if .Values.infisical.projectSlug }}
+        infisical:
+          projectSlug: '{{ .Values.infisical.projectSlug }}'
+          secretsPath: '{{ .Values.infisical.secretsPath }}'
+          endpoint: '{{ .Values.infisical.endpoint }}'
+          environment: '{{ .Values.infisical.environment }}'
+        {{- end }}
+  destination:
+    namespace: argocd
+    server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    {{- if .Values.autosync.enabled }}
+    automated:
+      prune: true
+    {{- end }}

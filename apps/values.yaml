@@ -1,0 +1,27 @@
+stack:
+  name: appstack
+
+autosync:
+  enabled: false
+
+# ESO backend: "kubernetes" (local dev) or "infisical"
+backend: kubernetes
+
+cluster:
+  domain: appstack.local
+
+source:
+  repoURL: https://github.com/your-org/your-repo.git
+  targetRevision: HEAD
+
+infisical:
+  endpoint: ""
+  environment: ""
+  projectSlug: ""
+  secretsPath: ""
+
+oauth:
+  enabled: false
+  authUrl: ""
+  signinUrl: ""
+  responseHeaders: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"

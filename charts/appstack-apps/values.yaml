@@ -1,0 +1,32 @@
+stack:
+  name: appstack  # Used as AppProject name and Application name prefix — set via --name in bootstrap.sh
+
+source:
+  repoURL: https://github.com/your-org/your-repo.git
+  targetRevision: main
+  username: ""
+  password: ""
+
+helm:
+  repoURL: ghcr.io/your-org/helm
+
+cluster:
+  name: k3d-lab-mycluster
+  domain: ""
+
+autosync:
+  enabled: true
+
+backend: kubernetes
+
+infisical:
+  endpoint: https://eu.infisical.com
+  environment: dev
+  projectSlug: ""
+  secretsPath: ""
+
+oauth:
+  enabled: false
+  authUrl: "http://authelia.authelia.svc.cluster.local/api/authz/auth-request"
+  signinUrl: "" # derived from cluster.domain if not set
+  responseHeaders: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"
