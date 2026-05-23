@@ -1,5 +1,0 @@
-apiVersion: v2
-name: appstack-secrets
-description: Bootstraps ESO credentials and ClusterSecretStore for appstack clusters.
-type: application
-version: 0.1.0

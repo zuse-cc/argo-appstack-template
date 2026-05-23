@@ -20,6 +20,7 @@ secrets:
       environment: ""
       projectSlug: ""
       secretsPath: ""
+      credentialsSecret: ""  # defaults to {{ stack.name }}-credentials
 
 oauth:
   enabled: false

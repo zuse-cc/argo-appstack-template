@@ -16,6 +16,8 @@ set -euo pipefail
 STACK_NAME="appstack"
 CLUSTER_NAME="k3d-lab-$(hostname)"
 CLUSTER_DOMAIN=""
+CHART_REPO=""   # e.g. oci://ghcr.io/your-org/helm
+CHART_VERSION=""
 
 # Derive a default HTTPS repo URL from the git remote, converting SSH format if needed
 _remote=$(git remote get-url origin 2>/dev/null || true)
@@ -49,6 +51,8 @@ Usage: $0 [options]
 
 Options:
   --name <name>               Stack name — used as ArgoCD project name and resource prefix (default: appstack)
+  --chart-repo <url>          OCI URL of the Helm chart repository (required; e.g. oci://ghcr.io/your-org/helm)
+  --chart-version <version>   Version of the appstack charts to install (required)
   --repo-url <url>            HTTPS URL of this repository (required; used for ArgoCD source and repo credentials)
   --cluster <name>            Cluster name (default: k3d-lab-<hostname>)
   --domain <domain>           Cluster domain (default: <cluster-name>.local)
@@ -82,6 +86,8 @@ fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --name)               STACK_NAME="$2";        shift 2 ;;
+    --chart-repo)         CHART_REPO="$2";        shift 2 ;;
+    --chart-version)      CHART_VERSION="$2";     shift 2 ;;
     --repo-url)           REPO_URL="$2";           shift 2 ;;
     --cluster)            CLUSTER_NAME="$2";       shift 2 ;;
     --domain)             CLUSTER_DOMAIN="$2";     shift 2 ;;
@@ -100,6 +106,10 @@ done
 CLUSTER_DOMAIN="${CLUSTER_DOMAIN:-${CLUSTER_NAME}.local}"
 BOOTSTRAP_RELEASE="bootstrap-${STACK_NAME}"
 LOCAL_SECRETS_NS="${STACK_NAME}-secrets"
+
+# Validate chart coordinates
+[[ -z "$CHART_REPO" ]]    && die "--chart-repo is required (e.g. oci://ghcr.io/your-org/helm)"
+[[ -z "$CHART_VERSION" ]] && die "--chart-version is required"
 
 # Validate repo URL — must be set and must use HTTPS (repo credentials use HTTP basic auth)
 [[ -z "$REPO_URL" ]] && die "--repo-url is required"
@@ -147,7 +157,8 @@ if [[ "$BACKEND" == "infisical" ]]; then
   log "Creating Infisical credentials secret..."
 
   SECRETS_ARGS=(
-    upgrade --install "${STACK_NAME}-secrets" ./charts/appstack-secrets
+    upgrade --install "${STACK_NAME}-secrets" "${CHART_REPO}/argo-appstack-secrets"
+    --version "$CHART_VERSION"
     --namespace external-secrets
     --create-namespace
     --set "backend=$BACKEND"
@@ -160,7 +171,8 @@ else
   # Add app-specific secrets here as additional --set flags, e.g.:
   #   --set "localSecrets.secrets.my-app-creds.API_KEY=${MY_APP_API_KEY:-}"
   SECRETS_ARGS=(
-    upgrade --install "${STACK_NAME}-secrets" ./charts/appstack-secrets
+    upgrade --install "${STACK_NAME}-secrets" "${CHART_REPO}/argo-appstack-secrets"
+    --version "$CHART_VERSION"
     --namespace "$LOCAL_SECRETS_NS"
     --create-namespace
     --set "localSecrets.namespace=${LOCAL_SECRETS_NS}"
@@ -170,7 +182,8 @@ fi
 helm "${SECRETS_ARGS[@]}"
 
 HELM_ARGS=(
-  upgrade --install "$BOOTSTRAP_RELEASE" ./charts/appstack-apps
+  upgrade --install "$BOOTSTRAP_RELEASE" "${CHART_REPO}/argo-appstack"
+  --version "$CHART_VERSION"
   --namespace "$BOOTSTRAP_NS"
   --create-namespace
   --set "stack.name=$STACK_NAME"
