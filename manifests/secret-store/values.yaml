@@ -10,3 +10,4 @@ secrets:
       projectSlug: ""
       environment: dev
       secretsPath: ""
+      credentialsSecret: ""  # defaults to {{ stack.name }}-credentials
